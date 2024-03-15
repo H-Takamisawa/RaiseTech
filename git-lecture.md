@@ -1,3 +1,3 @@
 # 内容
 
-- Pull Requestの練習のために作成しました。
+- 2回目のPull Request練習のために作成しました。
