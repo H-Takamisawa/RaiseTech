@@ -12,16 +12,16 @@
 
 - APサーバー起動時の画面
 
-![デプロイ結果](images/01_1_Apserver_deploy.png)
+![デプロイ結果](images/lecture03/01_1_Apserver_deploy.png)
 
 - APサーバーの名前：puma
 - バージョン：6.4.2
 
-![pumaのバージョン](images/01_2_puma_version.png)
+![pumaのバージョン](images/lecture03/01_2_puma_version.png)
 
 - APサーバーを終了させた場合、引き続きアクセスできますか？   →アクセス不可
 
-![puma終了時](images/01_3_Apserver_stop.png)
+![puma終了時](images/lecture03/01_3_Apserver_stop.png)
 
 
 ### 2. DBサーバーについての結果
@@ -29,21 +29,21 @@
 - DBサーバーの名前：Mysql
 - バージョン：8.0.36
 
-![DBサーバーのバージョン](images/02_1_DBserver_version.png)
+![DBサーバーのバージョン](images/lecture03/02_1_DBserver_version.png)
 
 - DBサーバーを終了させた場合、引き続きアクセスできますか？   →アクセス不可
 
-![Mysql終了時](images/02_2_DBserver_stop.png)
+![Mysql終了時](images/lecture03/02_2_DBserver_stop.png)
 
 - DBサーバーを再度起動したら、アクセス可能となりました。
 
-![Mysql再起動](images/02_3_DBserver_start.png)
+![Mysql再起動](images/lecture03/02_3_DBserver_start.png)
 
 - Railsの構成管理ツールの名前：Bundler
 
-![bundlerの説明](images/03_1_bundler.png)
+![bundlerの説明](images/lecture03/03_1_bundler.png)
 
-![Gemfile](images/03_2_Gemfile.png)
+![Gemfile](images/lecture03/03_2_Gemfile.png)
 
 ### 3.感想
 
