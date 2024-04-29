@@ -275,6 +275,7 @@
 ![IAMロール](images/lecture05/04_3_s3_iam_role.png)
 
 - EC2にIAMロールをアタッチ
+
 ![EC2にアタッチ](images/lecture05/04_4_ec2_iam_role_attach.png)
 
 - 動作確認
