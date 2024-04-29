@@ -250,7 +250,7 @@
 
 ## 3. ELB(ALB)を追加して動作確認する
 - ALBの作成
-![ALB](imagas/lecture05/03_1_alb.png)
+![ALB](images/lecture05/03_1_alb.png)
 - セキュリティグループ
     - インバウンドルール
     ![インバウンドルール](images/lecture05/03_2_1_security_group_in.png)
