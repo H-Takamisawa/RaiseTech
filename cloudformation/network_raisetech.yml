@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: create lecture10 VPC,subnet
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Network Configuration"
+        Parameters:
+          - Namebase
+          - VPCCIDR
+          - Public1CIDR
+          - Public2CIDR
+          - Private1CIDR
+          - Private2CIDR
+
+Parameters: 
+  Namebase:
+    Description: Environment base name.
+    Type: String
+    Default: lecture10
+
+  VPCCIDR:
+    Description: CIDR Block for VPC
+    Type: String
+    Default: 10.0.0.0/20
+
+  Public1CIDR:
+    Description: CIDR Block for Publicsubnet1
+    Type: String
+    Default: 10.0.1.0/24
+
+  Public2CIDR:
+    Description: CIDR Block for Publicsubnet2
+    Type: String
+    Default: 10.0.2.0/24
+
+  Private1CIDR:
+    Description: CIDR Block for Privatesubnet1
+    Type: String
+    Default: 10.0.8.0/24
+
+  Private2CIDR:
+    Description: CIDR Block for Privatesubnet2
+    Type: String
+    Default: 10.0.9.0/24
+
+Resources: 
+  #VPC
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-VPCfromCFn
+
+  # InterNetGateway
+  MyInterNetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-igw
+
+  # Attach IGW to VPC
+  AttachGatewaytoVPC:
+   Type: AWS::EC2::VPCGatewayAttachment
+   Properties:
+     VpcId: !Ref MyVPC
+     InternetGatewayId: !Ref MyInterNetGateway
+
+  # PublicSubnet
+  MyPublic1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1a
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref Public1CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-publicsubnet1fromCFn
+
+  MyPublic2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1c
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref Public2CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-publicsubnet2fromCFn
+
+  # PrivateSubnet
+  MyPrivate1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1a
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref Private1CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-privatesubnet1fromCFn
+
+  MyPrivate2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1c
+      VpcId: !Ref MyVPC
+      CidrBlock: !Ref Private2CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-privatesubnet2formCFn
+
+  # RouteTable
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-publicRT
+
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-private1RT
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-private2RT
+
+  # RouteTable-Association
+  Public1RTAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPublic1
+      RouteTableId: !Ref PublicRouteTable
+
+  Public2RTAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPublic2
+      RouteTableId: !Ref PublicRouteTable
+
+  Private1RTAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPrivate1
+      RouteTableId: !Ref PrivateRouteTable1
+  
+  Private2RTAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPrivate2
+      RouteTableId: !Ref PrivateRouteTable2
+
+  #Routing
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInterNetGateway
+
+Outputs:
+  VPC:
+    Description: VPC ID
+    Value: !Ref MyVPC
+    Export: 
+      Name: MyVpcId
+
+  PublicSubnet1Id:
+    Description: PublicSubnet1 ID
+    Value: !Ref MyPublic1
+    Export: 
+      Name: PubSub1Id
+
+  PublicSubnet2Id:
+    Description: PublicSubnet2 ID
+    Value: !Ref MyPublic2
+    Export: 
+      Name: PubSub2Id
+
+  PrivateSbunet1Id:
+    Description: PrivateSbunet1 ID
+    Value: !Ref MyPrivate1
+    Export: 
+      Name: PriSub1Id
+
+  PrivateSubnet2Id:
+    Description: PrivateSubnet2 ID
+    Value: !Ref MyPrivate2
+    Export: 
+      Name: PriSub2Id

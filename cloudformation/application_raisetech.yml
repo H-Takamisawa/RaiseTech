@@ -1,0 +1,282 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: create lecture10 EC2,RDS,S3
+
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Name base
+        Parameters:
+          - Namebase
+      - Label:
+          default: EC2 Config
+        Parameters:
+          - KeyName
+      - Label:
+          default: RDS Config
+        Parameters:
+          - RDSUser
+          - RDSpassword
+          - MyDBName
+          - MyEnginName
+          - MyEngineVersion
+          - MyDBMajorVersion
+
+Parameters: 
+  Namebase:
+    Description: Environment base name.
+    Type: String
+    Default: lecture10
+
+  KeyName:
+    Description: selecr key pair
+    Type: AWS::EC2::KeyPair::KeyName
+  
+  RDSUser:
+    Description: Input RDS Maseter User Name
+    Type: String
+    Default: root
+  
+  RDSpassword:
+    Description: Input RDS Password 
+    Type: String
+  
+  MyDBName:
+    Description: Input DB Name
+    Type: String
+    Default: mydatabase
+  
+  MyEnginName:
+    Description: Input DB Engine Name
+    Type: String
+    Default: mysql
+  
+  MyEngineVersion:
+    Description: Input DB Engine Version
+    Type: String
+    Default: 8.0.36
+
+  MyDBMajorVersion:
+    Description: Input DB Major Version
+    Type: String
+    Default: 8.0
+
+Resources:
+#-------------------------------------------------
+  #EC2
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda 
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: 8
+            DeleteOnTermination: true # EC2削除と同時にEBSの削除する
+      ImageId: ami-0d0150aa305b7226d  #Amazon Linux 2 Kernel 5.10 AMI 2.0.20240503.0 x86_64 HVM gp2
+      InstanceType: t2.micro
+      IamInstanceProfile: !Ref MyIamInstanceProfile  #IAMRole Attach
+      KeyName: !Ref KeyName
+      Monitoring: false
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"  #パブリックIPアドレスをp付与する
+          DeviceIndex: "0"  #ネットワークインターフェイスの番号
+          SubnetId: !ImportValue PubSub1Id
+          GroupSet: 
+            - !ImportValue EC2SGId
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-ec2-CFn
+
+#-------------------------------------------------
+  #RDS Subnet Group
+  MyDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: MyDBSubnetGroup
+      DBSubnetGroupName: !Sub ${Namebase}-db-subnetgruop-CFn
+      SubnetIds:
+        - !ImportValue PriSub1Id
+        - !ImportValue PriSub2Id
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-db-subnetgruop-CFn
+  
+  #DB Parameter Group
+  MyDBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties: 
+      Description: MySQL Parameter Group
+      DBParameterGroupName: !Sub ${Namebase}-db-parametergroup-CFn
+      Family: mysql8.0
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-db-parametergroup-CFn
+  
+  #DB Option Group
+  MyDBOptionGroup:
+    Type: AWS::RDS::OptionGroup
+    Properties:
+      OptionGroupDescription: MySQL Option Group
+      OptionGroupName: !Sub ${Namebase}-db-opotingroup-CFn
+      EngineName: !Ref MyEnginName
+      MajorEngineVersion: !Ref MyDBMajorVersion
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-db-opotingroup-CFn
+
+  #RDS
+  MyRDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      DBInstanceClass: db.t3.micro
+      AllowMajorVersionUpgrade: false
+      AutoMinorVersionUpgrade: false
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: !Ref AWS::Region
+      BackupRetentionPeriod: 0
+      DBInstanceIdentifier: !Sub ${Namebase}-rds-CFn
+      DBName: !Ref MyDBName
+      DBParameterGroupName: !Ref MyDBParameterGroup
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      Engine: !Ref MyEnginName
+      EngineVersion: !Ref MyEngineVersion 
+      MasterUsername: !Ref RDSUser
+      MasterUserPassword: !Ref RDSpassword
+      MultiAZ: false
+      OptionGroupName: !Ref MyDBOptionGroup
+      Port: 3306
+      PubliclyAccessible: false
+      StorageType: gp2
+      VPCSecurityGroups:
+       - !ImportValue RDSSGId
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-rds-CFn
+
+#-------------------------------------------------
+  #ALBTargetGroup
+  MyALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 2
+      IpAddressType: ipv4
+      Name: !Sub ${Namebase}-alb-tg-CFn
+      Port: 80
+      Protocol: HTTP
+      ProtocolVersion: HTTP1
+      TargetType: instance
+      Targets:
+       - Id: !Ref MyEC2Instance
+      VpcId: !ImportValue MyVpcId
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-alb-tg-CFn
+
+  #ALBListener
+  MyALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MyALBTargetGroup
+      LoadBalancerArn: !Ref MyALB
+      Port: 80
+      Protocol: HTTP
+
+  #ALB
+  MyALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      IpAddressType: ipv4
+      Name: !Sub ${Namebase}-alb-CFn
+      Subnets:
+        - !ImportValue PubSub1Id
+        - !ImportValue PubSub2Id
+      SecurityGroups:
+        - !ImportValue ALBSGId
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-alb-CFn
+
+#-------------------------------------------------
+  #S3
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Sub ${Namebase}-s3-bucket-CFn
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls:  true
+        BlockPublicPolicy:  true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-s3-bucket-CFn
+
+#-------------------------------------------------
+  #IAMpolicy
+  S3AccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub ${Namebase}-s3access-policy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 
+              - s3:GetObject
+              - s3:PutObject
+              - s3:ListBucket
+              - s3:DeleteObject
+            Resource: 
+              - !Sub arn:aws:s3:::${MyS3Bucket}
+              - !Sub arn:aws:s3:::${MyS3Bucket}/*
+  
+  #IAMRole
+  S3AccessIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${Namebase}-s3access-role
+      Path: /
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:
+            Service: 
+              - "ec2.amazonaws.com"  #どのAWSサービスに対してのRoleかを指定
+          Action: 
+            - "sts:AssumeRole"
+      ManagedPolicyArns: 
+        - !Ref S3AccessPolicy
+  
+  #IAM InstanceProflie - EC2インスタンスにIAMロールをアタッチするために必要
+  MyIamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub ${Namebase}-IamInstanceProfile
+      Path: /
+      Roles:
+        - !Ref S3AccessIAMRole
+
+Outputs:
+  EC2PublicIpAddress:
+    Description: Public IP of EC2 instance
+    Value:  !GetAtt MyEC2Instance.PublicIp
+
+  RDSEndpoint:
+    Description: Endpoint of RDS instance
+    Value:  !GetAtt MyRDSInstance.Endpoint.Address
+  
+  ALBDNSName:
+    Description: DNS Name of ALB
+    Value:  !GetAtt MyALB.DNSName
+
+  S3BuckeArn:
+    Description: ARN of S3 Bucket
+    Value:  !GetAtt MyS3Bucket.Arn

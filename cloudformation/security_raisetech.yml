@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: create security group and IAM  
+
+Parameters: 
+  Namebase:
+    Description: Environment base name.
+    Type: String
+    Default: lecture10
+  
+  VPCID:
+    Description: select VPC
+    Type: AWS::EC2::VPC::Id
+  
+  MyIpAddress:
+    Description: Ip address to allow SSH to EC2
+    Type: String
+
+Resources: 
+  #EC2 SecurityGroup
+  MyEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${Namebase}-ec2-sg
+      GroupDescription: !Sub ${Namebase}-ec2-sg created
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        #SSH
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref MyIpAddress
+        #TCP 3000
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+        #TCP 80
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-ec2-sg
+
+  #RDS SecurityGroup
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${Namebase}-rds-sg
+      GroupDescription: !Sub ${Namebase}-rds-sg created
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref MyEC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-rds-sg
+  
+  #Application Load Balancer SecurityGroup
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${Namebase}-alb-sg
+      GroupDescription: !Sub ${Namebase}-alb-sg created
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+      Tags:
+        - Key: Name
+          Value: !Sub ${Namebase}-alb-sg
+
+Outputs:
+  EC2SecurityGroupId:
+    Description: EC2SecurityGroup ID
+    Value: !Ref MyEC2SecurityGroup
+    Export: 
+      Name: EC2SGId
+  
+  RDSSecurityGroupId:
+    Description: RDSSecurityGroup ID
+    Value: !Ref RDSSecurityGroup
+    Export: 
+      Name: RDSSGId
+  
+  ALBSecurityGroupId:
+    Description: ALBSecurityGroup ID
+    Value: !Ref ALBSecurityGroup
+    Export: 
+      Name: ALBSGId
