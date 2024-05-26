@@ -1,6 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: create security group and IAM 
-#Metadata: 
+Description: create security group and IAM  
 
 Parameters: 
   Namebase:
