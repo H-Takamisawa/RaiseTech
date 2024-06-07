@@ -77,7 +77,7 @@ Resources:
   MyPublic1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: ap-northeast-1a
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
       VpcId: !Ref MyVPC
       CidrBlock: !Ref Public1CIDR
       Tags:
@@ -87,7 +87,7 @@ Resources:
   MyPublic2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: ap-northeast-1c
+      AvailabilityZone: !Select [ 1, !GetAZs "" ]
       VpcId: !Ref MyVPC
       CidrBlock: !Ref Public2CIDR
       Tags:
@@ -98,7 +98,7 @@ Resources:
   MyPrivate1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: ap-northeast-1a
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
       VpcId: !Ref MyVPC
       CidrBlock: !Ref Private1CIDR
       Tags:
@@ -108,7 +108,7 @@ Resources:
   MyPrivate2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: ap-northeast-1c
+      AvailabilityZone: !Select [ 1, !GetAZs "" ]
       VpcId: !Ref MyVPC
       CidrBlock: !Ref Private2CIDR
       Tags:

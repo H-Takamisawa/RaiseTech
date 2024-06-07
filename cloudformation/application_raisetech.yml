@@ -40,6 +40,7 @@ Parameters:
   RDSpassword:
     Description: Input RDS Password 
     Type: String
+    NoEcho: true
   
   MyDBName:
     Description: Input DB Name
