@@ -19,7 +19,7 @@
 
 ### 1.2 Cloudformationのスタック作成処理を実行
 - 実行結果
- ![1.2 Cloudformationのスタック作成の実行結果](imgaes/lecture13/1.2_result_CFn.png)
+ ![1.2 Cloudformationのスタック作成の実行結果](images/lecture13/1.2_result_CFn.png)
  
 ### 1.3 Ansibleの処理を実行
 - 実行結果
