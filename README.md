@@ -17,7 +17,7 @@
  ![AWS構成図](images/README/aws_configuration_diagram.png)
 
 ### 学習記録
-- RaiseTechで学習した講座概要と提出課題の対応は以下の通りです。<br>
+ RaiseTechで学習した講座概要と提出課題の対応は以下の通りです。<br>
 |講座|概要|提出課題|補足|
 |:---|:---|:---|:---|
 |第1回|AWSアカウント作成<br>IAM設定<br>Cloud9の作成|該当なし|Discord上に提出のため反映無し|
