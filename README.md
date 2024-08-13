@@ -17,13 +17,13 @@
  ![AWS構成図](images/README/aws_configuration_diagram.png)
 
 ### 学習記録
- RaiseTechで学習した講座概要と提出課題の対応は以下の通りです。<br>
+- RaiseTechで学習した講座概要と提出課題の対応は以下の通りです。<br>
 |講座|概要|提出課題|補足|
 |:---|:---|:---|:---|
 |第1回|AWSアカウント作成<br>IAM設定<br>Cloud9の作成|該当なし|Discord上に提出のため反映無し|
 |第2回|Gitの基礎学習<br>GitHubアカウントの作成<br>Pull Requestの練習|[lecture02.md](lecture02.md)|Cloud9のターミナルで実施|
 |第3回|Webアプリケーションについて<br>Cloud9でサンプルアプリケーション(Rails)のデプロイ|[lecture03.md](lecture03.md)||
-|第4回|VPC,EC2,RDSの手動構築<br>EC2からRDSへの接続確認|[lecture04.md](lecture04.md)|以降、EC2への接続Tera Termを使用|
+|第4回|VPC,EC2,RDSの手動構築<br>EC2からRDSへの接続確認|[lecture04.md](lecture04.md)|以降、EC2への接続はTera Termを使用|
 |第5回|手動でRailsアプリケーションの環境構築<br>ALB,S3の追加<br>AWS構成図の作成|[lecture05.md](lecture05.md)||
 |第6回|AWSでの証跡、ロギング<br>AWSでの監視、通知<br>AWSでのコスト管理|[lecture06.md](lecture06.md)|-|
 |第7回|システムにおけるセキュリティの基礎<br>AWSのセキュリティ対策|[lecture07.md](lecture07.md)|-|
@@ -36,4 +36,4 @@
 |第13回|Ansibleの導入<br>CircleCIとの併用|[lecture13.md](lecture13.md)|-|
 |第14回|第13回課題のライブコーディング|該当なし|-|
 |第15回|第13回課題のライブコーディング|該当なし|-|
-|第16回|現場へ出ていくにあたって必要な知識と技術や立ち振る舞いについて|該当なし|最終回|
+|第16回|現場へ出ていくにあたって必要な知識と技術、立ち振る舞いについて|該当なし|最終回|
